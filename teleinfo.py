@@ -4,7 +4,7 @@ import serial.tools.list_ports
 #import prometheus_client
 
 VENDOR_ID = '0403'
-PRODUCT_ID = '6001'
+PRODUCT_ID = '6015'
 
 keys_and_units = {
         "ISOUSC": ("amperes","Intensité souscrite (A)"),
