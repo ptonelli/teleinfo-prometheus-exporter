@@ -7,35 +7,23 @@ VENDOR_ID = '0403'
 PRODUCT_ID = '6015'
 
 keys_and_units = {
-        "ISOUSC": ("amperes","Intensité souscrite (A)"),
-        "BASE": ("watt_hours","Index option Base (Wh)"),
-        "HCHC": ("watt_hours","Index option Heures Creuses (Wh) Heures Creuses"),
-        "HCHP": ("watt_hours","Index option Heures Creuses (Wh) Heures Pleines"),
-        "EJPHN": ("watt_hours","Index option EJP (Wh) Heures Normales"),
-        "EJPHPM": ("watt_hours","Index option EJP (Wh) Heures de Pointe Mobile"),
-        "BBRHCJB": ("watt_hours","Index option Tempo (Wh) Heures Creuses Jours Bleus"),
-        "BBRHPJB": ("watt_hours","Index option Tempo (Wh) Heures Pleines Jours Bleus"),
-        "BBRHCJW": ("watt_hours","Index option Tempo (Wh) Heures Creuses Jours Blancs"),
-        "BBRHPJW": ("watt_hours","Index option Tempo (Wh) Heures Pleines Jours Blancs"),
-        "BBRHCJR": ("watt_hours","Index option Tempo (Wh) Heures Creuses Jours Rouges"),
-        "BBRHPJR": ("watt_hours","Index option Tempo (Wh) Heures Pleines Jours Rouges"),
-        "IINST": ("amperes","Intensité Instantanée (A)"),
-        "ADPS": ("amperes","Avertissement de Dépassement de Puissance Souscrite (A)"),
-        "IMAX": ("amperes","Intensité maximale (A)"),
-        "PAPP": ("volt_amperes", "Puissance apparente (VA)")
-## currently not managed
-# "ADCO" 12 caractères Adresse d’identification du compteur
-# "OPTARIF" 4 car. Option tarifaire choisie
-# "PEJP " 2 car. 30mn avant période EJP
-# "PTEC " 4 car. Période Tarifaire en cours
-# DEMAIN Couleur du lendemain
+        "EAST": ("Wh","Energie active soutirée Totale, index 02 (Wh)"),
+        "EASF01": ("Wh","Energie active soutirée Fournisseur, index 01 (Wh)"),
+        "EASF02": ("Wh","Energie active soutirée Fournisseur, index 02 (Wh)"),
+        "EASF03": ("Wh","Energie active soutirée Fournisseur, index 03 (Wh)"),
+        "EASF04": ("Wh","Energie active soutirée Fournisseur, index 04 (Wh)"),
+        "EASD01": ("Wh","Energie active soutirée Distributeur, index 01 (Wh)"),
+        "EASD02": ("Wh","Energie active soutirée Distributeur, index 02 (Wh)"),
+        "EASD03": ("Wh","Energie active soutirée Distributeur, index 03 (Wh)"),
+        "EASD04": ("Wh","Energie active soutirée Distributeur, index 04 (Wh)"),
 }
 
+#stty -F /dev/ttyUSB0 9600 -parodd cs7 -cstopb
 def initialize():
     device = next(serial.tools.list_ports.grep('%s:%s' % (VENDOR_ID, PRODUCT_ID))).device
     return serial.Serial(device, 
-                         baudrate=1200, 
-                         parity=serial.PARITY_EVEN, 
+                         baudrate=9600, 
+                         parity=serial.PARITY_ODD, 
                          stopbits=serial.STOPBITS_ONE, 
                          bytesize=serial.SEVENBITS, 
                          timeout=1)
@@ -48,7 +36,7 @@ def get_metrics(serial_port):
     while current_key != first_key or not first_key:
         if not first_key:
             first_key = current_key
-        line = serial_port.readline().strip().decode('utf-8').rsplit(' ', 2)
+        line = serial_port.readline().strip().decode('utf-8').rsplit('\t', 2)
         current_key = line[0]
         logging.debug('got %s' % str(line))
         for key in keys_and_units:
