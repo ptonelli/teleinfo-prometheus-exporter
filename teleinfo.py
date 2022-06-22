@@ -6,16 +6,16 @@ import serial.tools.list_ports
 VENDOR_ID = '0403'
 PRODUCT_ID = '6015'
 
-keys_and_units = {
-        "EAST": ("Wh","Energie active soutirée Totale, index 02 (Wh)"),
-        "EASF01": ("Wh","Energie active soutirée Fournisseur, index 01 (Wh)"),
-        "EASF02": ("Wh","Energie active soutirée Fournisseur, index 02 (Wh)"),
-        "EASF03": ("Wh","Energie active soutirée Fournisseur, index 03 (Wh)"),
-        "EASF04": ("Wh","Energie active soutirée Fournisseur, index 04 (Wh)"),
-        "EASD01": ("Wh","Energie active soutirée Distributeur, index 01 (Wh)"),
-        "EASD02": ("Wh","Energie active soutirée Distributeur, index 02 (Wh)"),
-        "EASD03": ("Wh","Energie active soutirée Distributeur, index 03 (Wh)"),
-        "EASD04": ("Wh","Energie active soutirée Distributeur, index 04 (Wh)"),
+keys_and_units = { #format EDF_NAME:  unit, comment
+        "EAST": ("Wh","Energie active soutiree Totale, index 02"),
+        "EASF01": ("Wh","Energie active soutiree Fournisseur index 01"),
+        "EASF02": ("Wh","Energie active soutiree Fournisseur index 02"),
+        "EASF03": ("Wh","Energie active soutiree Fournisseur index 03"),
+        "EASF04": ("Wh","Energie active soutiree Fournisseur index 04"),
+        "EASD01": ("Wh","Energie active soutiree Distributeur index 01"),
+        "EASD02": ("Wh","Energie active soutiree Distributeur index 02"),
+        "EASD03": ("Wh","Energie active soutiree Distributeur index 03"),
+        "EASD04": ("Wh","Energie active soutiree Distributeur index 04"),
 }
 
 #stty -F /dev/ttyUSB0 9600 -parodd cs7 -cstopb
