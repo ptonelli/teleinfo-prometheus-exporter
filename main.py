@@ -4,6 +4,7 @@ import teleinfo
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 
+
 prefix = "electricity_meter_teleinfo"
 app = FastAPI()
 items = {}
@@ -13,15 +14,14 @@ def get_metric_name(edf_label, unit,):
     return '_'.join(edf_label.lower().replace(',','').split(' ') + [unit])
 
 @app.on_event("startup")
-async def start_teleinfo():
-    items["teleinfo_serial_port"] = teleinfo.initialize()
+def start_teleinfo():
     items["prometheus_registry"] = CollectorRegistry()
     items["gauge_list"] = {} #used to store gauges as the registry does not contain everything
 
 @app.get("/metrics",response_class=PlainTextResponse)
-async def get_metrics():
+def get_metrics():
+    values = teleinfo.get_metrics()
     registry = items["prometheus_registry"]
-    values = teleinfo.get_metrics(items["teleinfo_serial_port"])
     gauge_list = items["gauge_list"]
     # we replace initial labels with the ones matching the registry labels
     for edf_key in list(values.keys()):
