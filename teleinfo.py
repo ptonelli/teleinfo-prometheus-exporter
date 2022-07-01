@@ -26,6 +26,14 @@ keys_and_units = { #format EDF_NAME:  unit, comment
 def get_device():
     return next(serial.tools.list_ports.grep('%s:%s' % (VENDOR_ID, PRODUCT_ID))).device
 
+
+def safe_get_metrics():
+    while True:
+        try:
+            return get_metrics()
+        except serial.serialutil.SerialException:
+            continue
+
 def get_metrics():
     with serial.Serial(get_device(),
                          baudrate=9600, 
@@ -45,7 +53,11 @@ def get_metrics():
           logging.debug('got %s' % str(line))
           for key in keys_and_units:
               if key == line[0]:
-                  frame[current_key] = (int(line[1]), *keys_and_units[current_key])
+                  try:
+                      value = int(line[1])
+                  except ValueError:
+                      value = int(line[1][:-1])
+                  frame[current_key] = (value, *keys_and_units[current_key])
                   logging.debug('added %s' % key)
                   break
     return frame 

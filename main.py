@@ -20,7 +20,7 @@ def start_teleinfo():
 
 @app.get("/metrics",response_class=PlainTextResponse)
 def get_metrics():
-    values = teleinfo.get_metrics()
+    values = teleinfo.safe_get_metrics()
     registry = items["prometheus_registry"]
     gauge_list = items["gauge_list"]
     # we replace initial labels with the ones matching the registry labels
