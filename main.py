@@ -1,5 +1,6 @@
 from prometheus_client import Gauge, CollectorRegistry, generate_latest
 import teleinfo
+import os
 
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
@@ -17,10 +18,11 @@ def get_metric_name(edf_label, unit,):
 def start_teleinfo():
     items["prometheus_registry"] = CollectorRegistry()
     items["gauge_list"] = {} #used to store gauges as the registry does not contain everything
+    items["teleinfo_device"] = teleinfo.Teleinfo(devicePath=os.getenv('DEVICE_PATH'))
 
 @app.get("/metrics",response_class=PlainTextResponse)
 def get_metrics():
-    values = teleinfo.safe_get_metrics()
+    values = items["teleinfo_device"].metrics
     registry = items["prometheus_registry"]
     gauge_list = items["gauge_list"]
     # we replace initial labels with the ones matching the registry labels
