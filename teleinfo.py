@@ -1,10 +1,12 @@
 import logging
 import serial
 import serial.tools.list_ports
+import os
 #import prometheus_client
 
-VENDOR_ID = '0403'
-PRODUCT_ID = '6015'
+VENDOR_ID = os.getenv('VENDOR_ID', '0403')
+PRODUCT_ID = os.getenv('VENDRO_ID', '6001')
+DEVICE_PATH = os.getenv('DEVICE_PATH')
 
 keys_and_units = { #format EDF_NAME:  unit, comment
         "EAST": ("Wh","Energie active soutiree Totale"),
@@ -24,7 +26,12 @@ keys_and_units = { #format EDF_NAME:  unit, comment
 
 #stty -F /dev/ttyUSB0 9600 -parodd cs7 -cstopb
 def get_device():
-    return next(serial.tools.list_ports.grep('%s:%s' % (VENDOR_ID, PRODUCT_ID))).device
+    if DEVICE_PATH: 
+        return DEVICE_PATH
+    elif VENDOR_ID and PRODUCT_ID:
+        return next(serial.tools.list_ports.grep('%s:%s' % (VENDOR_ID, PRODUCT_ID))).device
+    else:
+        raise ValueError('Please define either DEVICE_PATH or VENDOR_ID and PRODUCT_ID')
 
 
 def safe_get_metrics():
@@ -41,30 +48,31 @@ def get_metrics():
                          stopbits=serial.STOPBITS_ONE, 
                          bytesize=serial.SEVENBITS, 
                          timeout=1) as serial_port:
-      current_key = ''
-      first_key = ''
+      current_key = None
+      first_key = None
       frame = {}
       serial_port.readline() #purge buffer to get a complete line next
-      while current_key != first_key or not first_key:
-          if not first_key:
+      while first_key is None or current_key != first_key:
+          if first_key is None:
               first_key = current_key
           line = serial_port.readline().strip().decode('utf-8').rsplit('\t', 2)
           current_key = line[0]
           logging.debug('got %s' % str(line))
-          for key in keys_and_units:
-              if key == line[0]:
-                  try:
-                      value = int(line[1])
-                  except ValueError:
-                      value = int(line[1][:-1])
+          if line[0] in keys_and_units.keys():
+              try:
+                  value = int(line[1])
+              except ValueError:
+                  logging.error("could not convert %s to text", line[1])
+              else:
                   frame[current_key] = (value, *keys_and_units[current_key])
-                  logging.debug('added %s' % key)
-                  break
+                  logging.debug('added %s' % current_key)
     return frame 
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    values = get_metrics()
-    logging.info(values)
-
+    from time import sleep
+    logging.basicConfig(level=logging.INFO)
+    while True:
+        values = get_metrics()
+        logging.info(values)
+        sleep(10)
